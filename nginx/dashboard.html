@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini-Cloud Dashboard | UTS Cloud Computing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2236;
+      --border: #1e2d45;
+      --accent: #3b82f6;
+      --accent2: #6366f1;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --node1: #3b82f6;
+      --node2: #e74c3c;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .logo-text h1 { font-size: 20px; font-weight: 700; }
+    .logo-text p { font-size: 12px; color: var(--muted); }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: var(--green);
+      padding: 6px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+    }
+    .live-dot {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .refresh-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px; border-radius: 8px;
+      cursor: pointer; font-size: 13px; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+    /* GRID */
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 20px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 20px; }
+    @media(max-width:900px){ .grid-3{grid-template-columns:1fr 1fr;} }
+    @media(max-width:600px){ .grid-3,.grid-2{grid-template-columns:1fr;} }
+
+    /* CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: border-color 0.3s, transform 0.2s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-title {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--muted); margin-bottom: 12px;
+    }
+    .card-value { font-size: 32px; font-weight: 800; line-height: 1; }
+    .card-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    /* STAT CARDS */
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+
+    /* NODE CARDS */
+    .node-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .node-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+    .node-header {
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .node-1 .node-header { background: linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05)); border-bottom: 1px solid rgba(59,130,246,0.3); }
+    .node-2 .node-header { background: linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05)); border-bottom: 1px solid rgba(231,76,60,0.3); }
+    .node-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .node-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .node-1 .node-dot { background: var(--node1); box-shadow: 0 0 8px var(--node1); }
+    .node-2 .node-dot { background: var(--node2); box-shadow: 0 0 8px var(--node2); }
+    .status-badge {
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .status-ok { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+    .status-err { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+    .status-loading { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+    .node-body { padding: 20px; }
+    .node-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .node-row:last-child { border-bottom: none; }
+    .node-row-label { color: var(--muted); }
+    .node-row-value { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+    /* BAR */
+    .bar-wrap { margin-top: 16px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+    .bar-track {
+      height: 8px; background: var(--surface2);
+      border-radius: 4px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width 0.8s cubic-bezier(.4,0,.2,1);
+    }
+    .bar-cpu .bar-fill { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .bar-mem .bar-fill { background: linear-gradient(90deg, var(--green), #34d399); }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 14px; font-weight: 600;
+      color: var(--muted); margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    /* ACTIONS */
+    .actions-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+    .action-btn {
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; gap: 4px;
+      text-align: left;
+    }
+    .action-btn .btn-icon { font-size: 20px; }
+    .action-btn .btn-label { font-weight: 600; }
+    .action-btn .btn-desc { font-size: 11px; color: var(--muted); }
+    .action-btn:hover { transform: translateY(-2px); }
+    .btn-cache:hover { border-color: var(--green); background: rgba(16,185,129,0.08); }
+    .btn-load:hover { border-color: var(--yellow); background: rgba(245,158,11,0.08); }
+    .btn-nocache:hover { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+    .btn-prom:hover { border-color: var(--accent2); background: rgba(99,102,241,0.08); }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* RESULT BOX */
+    .result-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #94a3b8;
+      display: none;
+    }
+    .result-box.show { display: block; }
+    .result-box .key { color: #7dd3fc; }
+    .result-box .val { color: #86efac; }
+    .result-box .num { color: #fbbf24; }
+    .result-box .bool-true { color: var(--green); }
+    .result-box .bool-false { color: var(--red); }
+
+    /* REQUEST CHART */
+    .req-bar-container { display: flex; gap: 12px; align-items: flex-end; height: 80px; margin-top: 8px; }
+    .req-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .req-bar-track { width: 100%; background: var(--surface2); border-radius: 6px 6px 0 0; height: 60px; display: flex; align-items: flex-end; }
+    .req-bar-inner { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.8s cubic-bezier(.4,0,.2,1); min-height: 4px; }
+    .req-bar-node1 { background: linear-gradient(180deg, var(--node1), rgba(59,130,246,0.4)); }
+    .req-bar-node2 { background: linear-gradient(180deg, var(--node2), rgba(231,76,60,0.4)); }
+    .req-bar-label { font-size: 10px; color: var(--muted); text-align: center; font-weight: 600; }
+    .req-bar-count { font-size: 12px; font-weight: 700; }
+
+    /* UPTIME */
+    .uptime-text { font-size: 28px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; color: var(--muted);
+      font-size: 12px; margin-top: 32px;
+      padding-top: 20px; border-top: 1px solid var(--border);
+    }
+
+    /* SPINNER */
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">☁️</div>
+    <div class="logo-text">
+      <h1>Mini-Cloud Dashboard</h1>
+      <p>UTS Cloud Computing — Arsitektur IDEAL & Elastic</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div> LIVE</div>
+    <button class="refresh-btn" onclick="refreshAll()">⟳ Refresh</button>
+  </div>
+</header>
+
+<!-- STAT ROW -->
+<div class="grid-3" style="margin-bottom:24px">
+  <div class="card">
+    <div class="stat-icon">📦</div>
+    <div class="card-title">Total Requests</div>
+    <div class="card-value" id="stat-total">—</div>
+    <div class="card-sub">Cluster-wide request count</div>
+  </div>
+  <div class="card">
+    <div class="stat-icon">🌐</div>
+    <div class="card-title">Active Nodes</div>
+    <div class="card-value" id="stat-nodes">—</div>
+    <div class="card-sub">Load balanced workers</div>
+  </div>
+  <div class="card">
+    <div class="stat-icon">⏱️</div>
+    <div class="card-title">Cluster Uptime</div>
+    <div class="uptime-text" id="stat-uptime">—</div>
+    <div class="card-sub">Since last restart</div>
+  </div>
+</div>
+
+<!-- NODE CARDS -->
+<div class="section-title">🖥️ Worker Nodes</div>
+<div class="grid-2" style="margin-bottom:24px">
+  <!-- NODE 1 -->
+  <div class="node-card node-1" id="card-node1">
+    <div class="node-header">
+      <div class="node-name"><div class="node-dot"></div> app-node-1</div>
+      <span class="status-badge status-loading" id="badge-node1">⏳ Loading</span>
+    </div>
+    <div class="node-body">
+      <div class="node-row"><span class="node-row-label">Hostname</span><span class="node-row-value" id="n1-host">—</span></div>
+      <div class="node-row"><span class="node-row-label">Requests Served</span><span class="node-row-value" id="n1-req">—</span></div>
+      <div class="node-row"><span class="node-row-label">Cache Layer</span><span class="node-row-value" id="n1-cache">—</span></div>
+      <div class="node-row"><span class="node-row-label">Uptime</span><span class="node-row-value" id="n1-uptime">—</span></div>
+      <div class="bar-wrap bar-cpu">
+        <div class="bar-label"><span>CPU</span><span id="n1-cpu-val">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="n1-cpu-bar" style="width:0%"></div></div>
+      </div>
+      <div class="bar-wrap bar-mem" style="margin-top:12px">
+        <div class="bar-label"><span>Memory</span><span id="n1-mem-val">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="n1-mem-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+  <!-- NODE 2 -->
+  <div class="node-card node-2" id="card-node2">
+    <div class="node-header">
+      <div class="node-name"><div class="node-dot"></div> app-node-2</div>
+      <span class="status-badge status-loading" id="badge-node2">⏳ Loading</span>
+    </div>
+    <div class="node-body">
+      <div class="node-row"><span class="node-row-label">Hostname</span><span class="node-row-value" id="n2-host">—</span></div>
+      <div class="node-row"><span class="node-row-label">Requests Served</span><span class="node-row-value" id="n2-req">—</span></div>
+      <div class="node-row"><span class="node-row-label">Cache Layer</span><span class="node-row-value" id="n2-cache">—</span></div>
+      <div class="node-row"><span class="node-row-label">Uptime</span><span class="node-row-value" id="n2-uptime">—</span></div>
+      <div class="bar-wrap bar-cpu">
+        <div class="bar-label"><span>CPU</span><span id="n2-cpu-val">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="n2-cpu-bar" style="width:0%"></div></div>
+      </div>
+      <div class="bar-wrap bar-mem" style="margin-top:12px">
+        <div class="bar-label"><span>Memory</span><span id="n2-mem-val">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="n2-mem-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REQUEST DISTRIBUTION + ACTIONS -->
+<div class="grid-2" style="margin-bottom:24px">
+  <!-- Distribution chart -->
+  <div class="card">
+    <div class="card-title">📊 Request Distribution</div>
+    <div class="req-bar-container">
+      <div class="req-bar-wrap">
+        <div class="req-bar-count" id="dist-n1-count">0</div>
+        <div class="req-bar-track"><div class="req-bar-inner req-bar-node1" id="dist-n1-bar" style="height:4px"></div></div>
+        <div class="req-bar-label">app-node-1</div>
+      </div>
+      <div class="req-bar-wrap">
+        <div class="req-bar-count" id="dist-n2-count">0</div>
+        <div class="req-bar-track"><div class="req-bar-inner req-bar-node2" id="dist-n2-bar" style="height:4px"></div></div>
+        <div class="req-bar-label">app-node-2</div>
+      </div>
+    </div>
+    <div class="card-sub" style="margin-top:12px">Round-robin load distribution per node</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="card">
+    <div class="card-title">⚡ Demo Actions</div>
+    <div class="actions-grid">
+      <button class="action-btn btn-cache" id="btn-cache" onclick="demoCache()">
+        <span class="btn-icon">🗂️</span>
+        <span class="btn-label">Cache Demo</span>
+        <span class="btn-desc">Redis hit/miss test</span>
+      </button>
+      <button class="action-btn btn-load" id="btn-load" onclick="demoLoad()">
+        <span class="btn-icon">🔥</span>
+        <span class="btn-label">Load Test</span>
+        <span class="btn-desc">CPU stress simulation</span>
+      </button>
+      <button class="action-btn btn-nocache" id="btn-nocache" onclick="demoNoCache()">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-label">No-Cache</span>
+        <span class="btn-desc">Real-time endpoint</span>
+      </button>
+      <button class="action-btn btn-prom" onclick="window.open('http://'+location.hostname+':9090','_blank')">
+        <span class="btn-icon">📈</span>
+        <span class="btn-label">Prometheus</span>
+        <span class="btn-desc">Open monitoring UI</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="section-title">📋 Last Response</div>
+<div class="result-box" id="result-box"></div>
+
+<footer>
+  Mini-Cloud — UTS Cloud Computing &nbsp;|&nbsp; Nginx Load Balancer + Redis Cache + Prometheus Monitoring
+</footer>
+
+<script>
+  let startTime = Date.now();
+  let node1Data = null, node2Data = null;
+
+  function fmt(sec) {
+    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  function showResult(data) {
+    const box = document.getElementById('result-box');
+    box.classList.add('show');
+    box.innerHTML = syntaxHL(JSON.stringify(data, null, 2));
+  }
+
+  function syntaxHL(json) {
+    return json
+      .replace(/("[\w_]+")(?=\s*:)/g, '<span class="key">$1</span>')
+      .replace(/:\s*(".*?")/g, ': <span class="val">$1</span>')
+      .replace(/:\s*(\d+\.?\d*)/g, ': <span class="num">$1</span>')
+      .replace(/:\s*(true)/g, ': <span class="bool-true">$1</span>')
+      .replace(/:\s*(false)/g, ': <span class="bool-false">$1</span>');
+  }
+
+  async function fetchNode(path) {
+    const res = await fetch(path, { cache: 'no-store' });
+    return res.json();
+  }
+
+  function updateNodeCard(n, data) {
+    const badge = document.getElementById(`badge-node${n}`);
+    badge.textContent = '✅ Healthy';
+    badge.className = 'status-badge status-ok';
+
+    document.getElementById(`n${n}-host`).textContent = data.node?.hostname || '—';
+    document.getElementById(`n${n}-req`).textContent = data.metrics?.node_requests_served ?? '—';
+    document.getElementById(`n${n}-cache`).textContent = data.infrastructure?.cache_layer || '—';
+    document.getElementById(`n${n}-uptime`).textContent = fmt(data.node?.uptime_seconds || 0);
+
+    const cpu = data.metrics?.cpu_percent || 0;
+    const mem = data.metrics?.memory_percent || 0;
+    document.getElementById(`n${n}-cpu-val`).textContent = cpu.toFixed(1) + '%';
+    document.getElementById(`n${n}-cpu-bar`).style.width = cpu + '%';
+    document.getElementById(`n${n}-mem-val`).textContent = mem.toFixed(1) + '%';
+    document.getElementById(`n${n}-mem-bar`).style.width = mem + '%';
+  }
+
+  function updateDistribution() {
+    const r1 = node1Data?.metrics?.node_requests_served || 0;
+    const r2 = node2Data?.metrics?.node_requests_served || 0;
+    const max = Math.max(r1, r2, 1);
+    document.getElementById('dist-n1-count').textContent = r1;
+    document.getElementById('dist-n2-count').textContent = r2;
+    document.getElementById('dist-n1-bar').style.height = Math.max(4, (r1/max)*56) + 'px';
+    document.getElementById('dist-n2-bar').style.height = Math.max(4, (r2/max)*56) + 'px';
+    document.getElementById('stat-total').textContent = (node1Data?.metrics?.total_cluster_requests || 0).toLocaleString();
+  }
+
+  async function refreshAll() {
+    document.getElementById('stat-nodes').textContent = '…';
+    let ok = 0;
+
+    // fetch node1
+    try {
+      const d1 = await fetchNode('/');
+      if (d1.node?.id === 'app-node-1' || d1.node?.id) {
+        node1Data = d1; updateNodeCard(1, d1); ok++;
+      }
+    } catch(e) {
+      const b = document.getElementById('badge-node1');
+      b.textContent = '❌ Down'; b.className = 'status-badge status-err';
+    }
+
+    // fetch node2 (second call might hit the other node via round-robin)
+    try {
+      // Try multiple times to get node2 response
+      for (let i = 0; i < 4; i++) {
+        const d = await fetchNode('/no-cache');
+        if (d.node_id === 'app-node-2') {
+          // get full data for node2
+          const d2 = await fetchNode('/no-cache');
+          // We can only approximate, use no-cache response
+          if (!node2Data) node2Data = { node: {hostname:'app-node-2', uptime_seconds:0}, metrics:{node_requests_served:0,total_cluster_requests:0,cpu_percent:0,memory_percent:0}, infrastructure:{cache_layer:'unknown'} };
+          ok++;
+          break;
+        }
+      }
+    } catch(e) {}
+
+    // Simple approach: just hit / twice more for both nodes
+    try {
+      for (let i = 0; i < 6; i++) {
+        const d = await fetchNode('/');
+        const id = d.node?.id;
+        if (id === 'app-node-1') { node1Data = d; updateNodeCard(1, d); }
+        else if (id === 'app-node-2') { node2Data = d; updateNodeCard(2, d); }
+        if (node1Data && node2Data) break;
+      }
+    } catch(e) {}
+
+    document.getElementById('stat-nodes').textContent = ok + ' / 2';
+    updateDistribution();
+  }
+
+  async function demoCache() {
+    const btn = document.getElementById('btn-cache');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span><span class="btn-label">Fetching…</span>';
+    try {
+      const d = await fetchNode('/cache-demo');
+      showResult(d);
+    } catch(e) { showResult({error: e.message}); }
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-icon">🗂️</span><span class="btn-label">Cache Demo</span><span class="btn-desc">Redis hit/miss test</span>';
+  }
+
+  async function demoLoad() {
+    const btn = document.getElementById('btn-load');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span><span class="btn-label">Running…</span>';
+    try {
+      const d = await fetchNode('/load-test');
+      showResult(d);
+    } catch(e) { showResult({error: e.message}); }
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-icon">🔥</span><span class="btn-label">Load Test</span><span class="btn-desc">CPU stress simulation</span>';
+    refreshAll();
+  }
+
+  async function demoNoCache() {
+    const btn = document.getElementById('btn-nocache');
+    btn.disabled = true;
+    try {
+      const d = await fetchNode('/no-cache');
+      showResult(d);
+    } catch(e) { showResult({error: e.message}); }
+    btn.disabled = false;
+  }
+
+  // Uptime counter
+  setInterval(() => {
+    const sec = Math.floor((Date.now() - startTime) / 1000);
+    document.getElementById('stat-uptime').textContent = fmt(sec);
+  }, 1000);
+
+  // Auto-refresh every 10s
+  setInterval(refreshAll, 10000);
+
+  // Initial load
+  refreshAll();
+</script>
+</body>
+</html>
