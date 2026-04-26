@@ -24,7 +24,7 @@ services:
       - REDIS_PORT=6379
     networks:
       cloud-net:
-        ipv4_address: 172.20.0.23
+        ipv4_address: 172.25.0.23
     restart: unless-stopped
     labels:
       - "role=worker"
