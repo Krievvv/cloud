@@ -1,0 +1,48 @@
+version: '3.8'
+
+# ============================================================
+# HORIZONTAL SCALING OVERRIDE
+# Jalankan dengan: docker-compose -f docker-compose.yml -f docker-compose.scale.yml up -d
+#
+# File ini menambahkan app-node-3 sebagai node baru (scale-out)
+# TANPA mematikan service yang sudah berjalan
+# Ini adalah simulasi Horizontal Scaling (Elastic Computing)
+# ============================================================
+
+services:
+
+  # Node ke-3 ditambahkan saat traffic meningkat
+  app-node-3:
+    build: ./app3
+    container_name: cloud-app-node-3
+    expose:
+      - "5000"
+    environment:
+      - NODE_ID=app-node-3
+      - NODE_COLOR=#2ecc71
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+    networks:
+      cloud-net:
+        ipv4_address: 172.20.0.23
+    restart: unless-stopped
+    labels:
+      - "role=worker"
+      - "tier=application"
+      - "scaling=horizontal-scale-out"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+  # Update load balancer config untuk include node-3
+  load-balancer:
+    volumes:
+      - ./nginx/nginx-scaled.conf:/etc/nginx/nginx.conf

@@ -1,0 +1,162 @@
+version: '3.8'
+
+# ============================================================
+# MINI-CLOUD ENVIRONMENT SIMULATION
+# UTS Cloud Computing - Arsitektur IDEAL & Elastic Computing
+# ============================================================
+# Topologi:
+#   [Client] --> [Nginx Load Balancer] --> [App Node 1]
+#                                     --> [App Node 2]
+#                                     --> [App Node 3] (scale-out)
+#               [Redis Cache Layer]
+#               [Prometheus Monitoring]
+# ============================================================
+
+networks:
+  cloud-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+volumes:
+  redis-data:
+  prometheus-data:
+
+services:
+
+  # =============================================
+  # LOAD BALANCER (Entry Point - Simulasi CDN/Gateway)
+  # Prinsip IDEAL: Less-coupled, Adaptive
+  # =============================================
+  load-balancer:
+    build: ./nginx
+    container_name: cloud-load-balancer
+    ports:
+      - "80:80"
+      - "8080:8080"  # Dashboard status
+    depends_on:
+      - app-node-1
+      - app-node-2
+    networks:
+      cloud-net:
+        ipv4_address: 172.25.0.10
+    restart: always
+    labels:
+      - "role=load-balancer"
+      - "layer=edge"
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # =============================================
+  # APP NODE 1 - Worker Node (IaaS Simulation)
+  # Prinsip IDEAL: Isolated, Democratic
+  # =============================================
+  app-node-1:
+    build: ./app1
+    container_name: cloud-app-node-1
+    expose:
+      - "5000"
+    environment:
+      - NODE_ID=app-node-1
+      - NODE_COLOR=#3498db
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+    networks:
+      cloud-net:
+        ipv4_address: 172.25.0.21
+    restart: unless-stopped
+    labels:
+      - "role=worker"
+      - "tier=application"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+  # =============================================
+  # APP NODE 2 - Worker Node (IaaS Simulation)
+  # Prinsip IDEAL: Isolated, Democratic
+  # =============================================
+  app-node-2:
+    build: ./app2
+    container_name: cloud-app-node-2
+    expose:
+      - "5000"
+    environment:
+      - NODE_ID=app-node-2
+      - NODE_COLOR=#e74c3c
+      - REDIS_HOST=redis-cache
+      - REDIS_PORT=6379
+    networks:
+      cloud-net:
+        ipv4_address: 172.25.0.22
+    restart: unless-stopped
+    labels:
+      - "role=worker"
+      - "tier=application"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+  # =============================================
+  # REDIS CACHE - Caching & Session Layer
+  # Prinsip IDEAL: Elastic, Less-coupled
+  # =============================================
+  redis-cache:
+    image: redis:7-alpine
+    container_name: cloud-redis-cache
+    expose:
+      - "6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      cloud-net:
+        ipv4_address: 172.25.0.30
+    restart: unless-stopped
+    labels:
+      - "role=cache"
+      - "tier=data"
+    command: redis-server --appendonly yes --maxmemory 64mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # =============================================
+  # PROMETHEUS - Monitoring & Observability
+  # Prinsip IDEAL: Adaptive (auto-detect metrics)
+  # =============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cloud-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      cloud-net:
+        ipv4_address: 172.25.0.40
+    restart: unless-stopped
+    labels:
+      - "role=monitoring"
