@@ -20,6 +20,7 @@
       --muted: #64748b;
       --node1: #3b82f6;
       --node2: #e74c3c;
+      --node3: #2ecc71; /* Warna untuk Node 3 */
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -119,10 +120,14 @@
     }
     .node-1 .node-header { background: linear-gradient(135deg,rgba(59,130,246,0.2),rgba(59,130,246,0.05)); border-bottom: 1px solid rgba(59,130,246,0.3); }
     .node-2 .node-header { background: linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05)); border-bottom: 1px solid rgba(231,76,60,0.3); }
+    .node-3 .node-header { background: linear-gradient(135deg,rgba(46,204,113,0.2),rgba(46,204,113,0.05)); border-bottom: 1px solid rgba(46,204,113,0.3); }
+    
     .node-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
     .node-dot { width: 10px; height: 10px; border-radius: 50%; }
     .node-1 .node-dot { background: var(--node1); box-shadow: 0 0 8px var(--node1); }
     .node-2 .node-dot { background: var(--node2); box-shadow: 0 0 8px var(--node2); }
+    .node-3 .node-dot { background: var(--node3); box-shadow: 0 0 8px var(--node3); }
+    
     .status-badge {
       padding: 4px 10px; border-radius: 20px;
       font-size: 11px; font-weight: 600;
@@ -219,6 +224,7 @@
     .req-bar-inner { width: 100%; border-radius: 6px 6px 0 0; transition: height 0.8s cubic-bezier(.4,0,.2,1); min-height: 4px; }
     .req-bar-node1 { background: linear-gradient(180deg, var(--node1), rgba(59,130,246,0.4)); }
     .req-bar-node2 { background: linear-gradient(180deg, var(--node2), rgba(231,76,60,0.4)); }
+    .req-bar-node3 { background: linear-gradient(180deg, var(--node3), rgba(46,204,113,0.4)); }
     .req-bar-label { font-size: 10px; color: var(--muted); text-align: center; font-weight: 600; }
     .req-bar-count { font-size: 12px; font-weight: 700; }
 
@@ -260,7 +266,6 @@
   </div>
 </header>
 
-<!-- STAT ROW -->
 <div class="grid-3" style="margin-bottom:24px">
   <div class="card">
     <div class="stat-icon">📦</div>
@@ -282,10 +287,9 @@
   </div>
 </div>
 
-<!-- NODE CARDS -->
 <div class="section-title">🖥️ Worker Nodes</div>
-<div class="grid-2" style="margin-bottom:24px">
-  <!-- NODE 1 -->
+<div class="grid-3" style="margin-bottom:24px">
+  
   <div class="node-card node-1" id="card-node1">
     <div class="node-header">
       <div class="node-name"><div class="node-dot"></div> app-node-1</div>
@@ -293,8 +297,8 @@
     </div>
     <div class="node-body">
       <div class="node-row"><span class="node-row-label">Hostname</span><span class="node-row-value" id="n1-host">—</span></div>
-      <div class="node-row"><span class="node-row-label">Requests Served</span><span class="node-row-value" id="n1-req">—</span></div>
-      <div class="node-row"><span class="node-row-label">Cache Layer</span><span class="node-row-value" id="n1-cache">—</span></div>
+      <div class="node-row"><span class="node-row-label">Requests</span><span class="node-row-value" id="n1-req">—</span></div>
+      <div class="node-row"><span class="node-row-label">Cache</span><span class="node-row-value" id="n1-cache">—</span></div>
       <div class="node-row"><span class="node-row-label">Uptime</span><span class="node-row-value" id="n1-uptime">—</span></div>
       <div class="bar-wrap bar-cpu">
         <div class="bar-label"><span>CPU</span><span id="n1-cpu-val">—</span></div>
@@ -306,7 +310,7 @@
       </div>
     </div>
   </div>
-  <!-- NODE 2 -->
+  
   <div class="node-card node-2" id="card-node2">
     <div class="node-header">
       <div class="node-name"><div class="node-dot"></div> app-node-2</div>
@@ -314,8 +318,8 @@
     </div>
     <div class="node-body">
       <div class="node-row"><span class="node-row-label">Hostname</span><span class="node-row-value" id="n2-host">—</span></div>
-      <div class="node-row"><span class="node-row-label">Requests Served</span><span class="node-row-value" id="n2-req">—</span></div>
-      <div class="node-row"><span class="node-row-label">Cache Layer</span><span class="node-row-value" id="n2-cache">—</span></div>
+      <div class="node-row"><span class="node-row-label">Requests</span><span class="node-row-value" id="n2-req">—</span></div>
+      <div class="node-row"><span class="node-row-label">Cache</span><span class="node-row-value" id="n2-cache">—</span></div>
       <div class="node-row"><span class="node-row-label">Uptime</span><span class="node-row-value" id="n2-uptime">—</span></div>
       <div class="bar-wrap bar-cpu">
         <div class="bar-label"><span>CPU</span><span id="n2-cpu-val">—</span></div>
@@ -327,11 +331,31 @@
       </div>
     </div>
   </div>
+
+  <div class="node-card node-3" id="card-node3">
+    <div class="node-header">
+      <div class="node-name"><div class="node-dot"></div> app-node-3</div>
+      <span class="status-badge status-loading" id="badge-node3">⏳ Loading</span>
+    </div>
+    <div class="node-body">
+      <div class="node-row"><span class="node-row-label">Hostname</span><span class="node-row-value" id="n3-host">—</span></div>
+      <div class="node-row"><span class="node-row-label">Requests</span><span class="node-row-value" id="n3-req">—</span></div>
+      <div class="node-row"><span class="node-row-label">Cache</span><span class="node-row-value" id="n3-cache">—</span></div>
+      <div class="node-row"><span class="node-row-label">Uptime</span><span class="node-row-value" id="n3-uptime">—</span></div>
+      <div class="bar-wrap bar-cpu">
+        <div class="bar-label"><span>CPU</span><span id="n3-cpu-val">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="n3-cpu-bar" style="width:0%"></div></div>
+      </div>
+      <div class="bar-wrap bar-mem" style="margin-top:12px">
+        <div class="bar-label"><span>Memory</span><span id="n3-mem-val">—</span></div>
+        <div class="bar-track"><div class="bar-fill" id="n3-mem-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- REQUEST DISTRIBUTION + ACTIONS -->
 <div class="grid-2" style="margin-bottom:24px">
-  <!-- Distribution chart -->
   <div class="card">
     <div class="card-title">📊 Request Distribution</div>
     <div class="req-bar-container">
@@ -345,11 +369,15 @@
         <div class="req-bar-track"><div class="req-bar-inner req-bar-node2" id="dist-n2-bar" style="height:4px"></div></div>
         <div class="req-bar-label">app-node-2</div>
       </div>
+      <div class="req-bar-wrap">
+        <div class="req-bar-count" id="dist-n3-count">0</div>
+        <div class="req-bar-track"><div class="req-bar-inner req-bar-node3" id="dist-n3-bar" style="height:4px"></div></div>
+        <div class="req-bar-label">app-node-3</div>
+      </div>
     </div>
     <div class="card-sub" style="margin-top:12px">Round-robin load distribution per node</div>
   </div>
 
-  <!-- Actions -->
   <div class="card">
     <div class="card-title">⚡ Demo Actions</div>
     <div class="actions-grid">
@@ -377,7 +405,6 @@
   </div>
 </div>
 
-<!-- RESULT -->
 <div class="section-title">📋 Last Response</div>
 <div class="result-box" id="result-box"></div>
 
@@ -387,7 +414,7 @@
 
 <script>
   let startTime = Date.now();
-  let node1Data = null, node2Data = null;
+  let node1Data = null, node2Data = null, node3Data = null;
 
   function fmt(sec) {
     const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
@@ -435,66 +462,55 @@
   function updateDistribution() {
     const r1 = node1Data?.metrics?.node_requests_served || 0;
     const r2 = node2Data?.metrics?.node_requests_served || 0;
-    const max = Math.max(r1, r2, 1);
+    const r3 = node3Data?.metrics?.node_requests_served || 0;
+    const max = Math.max(r1, r2, r3, 1);
+    
     document.getElementById('dist-n1-count').textContent = r1;
     document.getElementById('dist-n2-count').textContent = r2;
+    document.getElementById('dist-n3-count').textContent = r3;
     document.getElementById('dist-n1-bar').style.height = Math.max(4, (r1/max)*56) + 'px';
     document.getElementById('dist-n2-bar').style.height = Math.max(4, (r2/max)*56) + 'px';
-    document.getElementById('stat-total').textContent = (node1Data?.metrics?.total_cluster_requests || 0).toLocaleString();
+    document.getElementById('dist-n3-bar').style.height = Math.max(4, (r3/max)*56) + 'px';
+    
+    const t1 = node1Data?.metrics?.total_cluster_requests || 0;
+    const t2 = node2Data?.metrics?.total_cluster_requests || 0;
+    const t3 = node3Data?.metrics?.total_cluster_requests || 0;
+    document.getElementById('stat-total').textContent = Math.max(t1, t2, t3).toLocaleString();
   }
 
   async function refreshAll() {
     document.getElementById('stat-nodes').textContent = '…';
-    let ok = 0;
-
-    // fetch node1
-    try {
-      const d1 = await fetchNode('/');
-      if (d1.node?.id === 'app-node-1' || d1.node?.id) {
-        node1Data = d1; updateNodeCard(1, d1); ok++;
-      }
-    } catch(e) {
-      const b = document.getElementById('badge-node1');
-      b.textContent = '❌ Down'; b.className = 'status-badge status-err';
+    let seen = new Set();
+    
+    // Nginx men-cache '/' selama 30 detik. 
+    // Kita tambahkan parameter ?_=angka_acak agar Nginx dipaksa mem-bypass cache
+    // dan mengambil data real-time langsung dari setiap node secara berurutan.
+    for (let i = 0; i < 6; i++) {
+       try {
+          const res = await fetchNode('/?_=' + Math.random());
+          if (res && res.node) {
+             const id = res.node.id;
+             if (id === 'app-node-1') { node1Data = res; updateNodeCard(1, res); seen.add(1); }
+             if (id === 'app-node-2') { node2Data = res; updateNodeCard(2, res); seen.add(2); }
+             if (id === 'app-node-3') { node3Data = res; updateNodeCard(3, res); seen.add(3); }
+          }
+       } catch(e) {}
     }
 
-    // fetch node2 (second call might hit the other node via round-robin)
-    try {
-      // Try multiple times to get node2 response
-      for (let i = 0; i < 4; i++) {
-        const d = await fetchNode('/no-cache');
-        if (d.node_id === 'app-node-2') {
-          // get full data for node2
-          const d2 = await fetchNode('/no-cache');
-          // We can only approximate, use no-cache response
-          if (!node2Data) node2Data = { node: {hostname:'app-node-2', uptime_seconds:0}, metrics:{node_requests_served:0,total_cluster_requests:0,cpu_percent:0,memory_percent:0}, infrastructure:{cache_layer:'unknown'} };
-          ok++;
-          break;
-        }
-      }
-    } catch(e) {}
+    // Jika node tidak merespons, ubah UI menjadi 'Down'
+    if (!seen.has(1)) { const b = document.getElementById('badge-node1'); b.textContent = '❌ Down'; b.className = 'status-badge status-err'; }
+    if (!seen.has(2)) { const b = document.getElementById('badge-node2'); b.textContent = '❌ Down'; b.className = 'status-badge status-err'; }
+    if (!seen.has(3)) { const b = document.getElementById('badge-node3'); b.textContent = '❌ Down'; b.className = 'status-badge status-err'; }
 
-    // Simple approach: just hit / twice more for both nodes
-    try {
-      for (let i = 0; i < 6; i++) {
-        const d = await fetchNode('/');
-        const id = d.node?.id;
-        if (id === 'app-node-1') { node1Data = d; updateNodeCard(1, d); }
-        else if (id === 'app-node-2') { node2Data = d; updateNodeCard(2, d); }
-        if (node1Data && node2Data) break;
-      }
-    } catch(e) {}
-
-    document.getElementById('stat-nodes').textContent = ok + ' / 2';
+    document.getElementById('stat-nodes').textContent = seen.size + ' / 3';
     updateDistribution();
   }
-
   async function demoCache() {
     const btn = document.getElementById('btn-cache');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span><span class="btn-label">Fetching…</span>';
     try {
-      const d = await fetchNode('/cache-demo');
+      const d = await fetchNode('/cache-demo?_=' + Math.random());
       showResult(d);
     } catch(e) { showResult({error: e.message}); }
     btn.disabled = false;
@@ -524,16 +540,16 @@
     btn.disabled = false;
   }
 
-  // Uptime counter
+  // Counter Uptime
   setInterval(() => {
     const sec = Math.floor((Date.now() - startTime) / 1000);
     document.getElementById('stat-uptime').textContent = fmt(sec);
   }, 1000);
 
-  // Auto-refresh every 10s
+  // Auto-refresh setiap 10 detik
   setInterval(refreshAll, 10000);
 
-  // Initial load
+  // Eksekusi awal
   refreshAll();
 </script>
 </body>
